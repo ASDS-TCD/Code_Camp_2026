@@ -1,340 +1,294 @@
 ###############################################################################
-# Title:        Coding Camp - Day 2 - Part 1
+# Title:        Coding Camp - Day 2 - Part 1  
 # Description:  R basics II + Good practices
 # Author:       Elena Karagianni
 # R version:    R 4.5.2
 ###############################################################################
 
 
-# (1) Projects
-# (2) Working directory
+##################################
+# (1) Projects & working directory
+##################################
 
-# Try running this (it informs you where your current WD is set):
+# Every R session has a *working directory*: the folder R treats as "here".
+# Relative paths like "data/mydata.csv" are read from this folder, so it
+# pays to know where it points.
+
 getwd()
 
-# If you want to change the working directory, you run the command 
-# setwd() and you insert the pathname in the parentheses. 
-# Try it out with any folder you prefer:
-setwd()
+# You can move it with setwd(), passing a path in the parentheses:
+#   setwd("~/Desktop/coding camp 26")
+# ...but a better habit is to work inside an RStudio *Project*. When you
+# open a .Rproj file, RStudio sets the working directory to that folder
+# automatically, every time. No setwd() lines cluttering your script.
 
-# Of course, you can do it manually through the navigation pane. 
-# You navigate to your preferred folder, you click the "More" button and then 
-# click 'Set as Working Directory'. 
-# This might be useful for Windows users, since you have the reverse \ problem  
-# with file paths.
-getwd()
+# You can also set it by hand: in the Files pane, navigate to a folder,
+# click "More" -> "Set As Working Directory". Handy for Windows users, who
+# otherwise have to deal with backslashes in copied paths.
 
-# (3) Libraries
 
-# One of R's strengths is the large number of *packages* which users
-# have created for different tasks. Packages contain functions which 
-# we can use on our data.
+###########################
+# (2) Libraries
+###########################
 
-# The search() function shows us which packages are loaded in our R session. 
+# R's real strength is its *packages*: collections of functions other people
+# have written. search() shows which are loaded right now.
 
 search()
 
-# The install.packages() function allows us to install new packages from the 
-# web. Here, we are installing a suite of packages known as the "tidyverse". 
+# install.packages() downloads a package from the web. You only need to do
+# this ONCE per machine. Here we install the "tidyverse", a bundle of
+# packages for reading, wrangling and plotting data.
 
 install.packages("tidyverse")
 
-# Installing a package does not make it available to us in our R session. 
-# To make a package available, along with its functions, we need to use 
-# the library() function. 
+# Installing does not load. To use a package's functions in this session we
+# call library(). Do this at the top of every script, every session.
 
 library(tidyverse)
 
-search()
-
-# The tidyverse packages are now listed in our session. 
-
-#######
-# Help!
-#######
-
-# There are many ways of accessing help in R. The help() function is the main
-# method. Its shortcut is "?".
-
-help(tidyverse)
-?tidyverse
-?persp
-
-# The example() function provides an interactive demo
-
-example(persp)
+search()   # the tidyverse packages now appear
 
 
-# Some packages have *vignettes*, which go into more detail than R help files
-# (which can be very terse). The vignette() function accesses there, or use
-# browseVignettes(package = "name") to search. 
+###########################
+# (3) Getting help
+###########################
 
-?dplyr
+# ? and help() open a function's documentation.
+?mean
+help(mean)
+
+# example() runs the examples from the bottom of a help page.
+example(mean)
+
+# Some packages ship *vignettes* - longer, friendlier guides than the terse
+# help pages.
 vignette("dplyr")
 browseVignettes(package = "dplyr")
 
-# If you're looking for help on a particular area, and aren't sure what function
-# or package to use, try the help.search() function. 
+# Not sure which function you need? Search all installed help with two ??
+??"standard deviation"
 
-help.search("standard deviation")
 
-#####################
-# R Basics - Part II
-#####################
+###########################
+# (4) Examining a dataset
+###########################
 
-# Let's use some data:
-# mtcars is a built-in dataset contained in R's datasets library.
-# It is, unsurprisingly, a dataset about cars. 
-
+# mtcars is built into R: 32 cars, 11 measurements each.
 ?mtcars
 
-# The summary() function provides some summary statistics of the dataset. 
-summary(mtcars)
+# Four functions worth reaching for whenever you meet new data:
+summary(mtcars)   # min / max / quartiles per column
+str(mtcars)       # structure: type and first values of each column
+head(mtcars)      # first 6 rows
+glimpse(mtcars)   # tidyverse's str()
 
-# The str() function provides information about the *structure* of the dataset. 
-str(mtcars)
+# This next plot shows five
+# variables at once: weight, fuel economy, cylinders, horsepower and
+# transmission type. Do NOT worry about the code right now. 
 
-# The head() function provides the first 6 entries in each variable. 
-head(mtcars)
+mtcars_demo <- mtcars
+mtcars_demo$am  <- factor(mtcars_demo$am,  labels = c("automatic", "manual"))
+mtcars_demo$cyl <- factor(mtcars_demo$cyl)
 
-# The ls.str() function combines the ls() and str() functions. 
-ls.str(mtcars)
-
-# These are all useful functions to remember when exploring a new dataset. 
-
-# The next example makes use of the 'ggplot2' package (a more advanced 
-# graphics package than base R graphics) to produce a scatter plot which is 
-# able simultaneously to show the relationship between five variables: 
-# the weight of the car, its fuel economy, the number of cylinders, 
-# its horsepower and type of transmission.
-# Further, three trend lines show the relationship between weight and 
-# mpg for 4, 6, and 8 cylinder cars. 
-library(ggplot2)
-
-mtcars$am <- as.factor(mtcars$am)
-mtcars$cyl <- as.factor(mtcars$cyl)
-
-ggplot(mtcars, aes(wt, mpg, size = hp)) +
-  geom_text(aes(size = hp, label = cyl, color = am)) +
-  geom_smooth(aes(linetype = cyl), color = "grey", linewidth = 0.5, 
-              se = F, show.legend = F) +
+ggplot(mtcars_demo, aes(wt, mpg)) +
+  geom_text(aes(label = cyl, colour = am, size = hp)) +
+  geom_smooth(aes(linetype = cyl), colour = "grey50",
+              linewidth = 0.5, se = FALSE, show.legend = FALSE) +
   guides(size = "none") +
-  theme_classic() + 
-  theme(legend.title = element_blank(), legend.justification = c(1,1),
-        legend.position = c(1,1)) +
-  scale_color_manual(labels = c("automatic", "manual"),
-                     values = c("blue", "red")) +
-  labs(title = "Plot of Fuel Efficiency by Weight for 32 Cars",
-       subtitle = "Number of cylinders; size = horsepower") +
-  xlab("Weight (1000 lbs)")
+  scale_colour_manual(values = c(automatic = "blue", manual = "red")) +
+  labs(title = "Fuel efficiency by weight for 32 cars",
+       subtitle = "Digit = cylinders; size = horsepower",
+       x = "Weight (1000 lbs)", y = "Miles per gallon", colour = NULL) +
+  theme_classic()
 
-# It is not always a good idea to show so many variables
-# simultaneously, but the plot gives a good idea of what
-# is possible with R. Again, do not worry about the 
-# specifics of the code at this point.
-
-# A better example...
-ggplot(mpg, aes(x = displ)) + 
-  geom_histogram(bins = 10, fill = "darkblue", alpha = 0.5) +
-  geom_text(stat = "bin", bins = 10, aes(label = stat(count),
-                                         y = stat(count)), 
-            nudge_y = 2, color = "darkblue", size = 3) +
-  scale_x_continuous(breaks = 1:7) +
-  theme_bw()
-
-###############
-# Exercise
-###############
-
+# ---------------------------------------------------------------------------
+# EXERCISE 1  (try it yourself - solutions in Day2_Solutions.R)
+#
 # The mpg dataset is a built in dataset for the ggplot
 # package. By recycling the code in this script file, 
 # explore the dataset and try creating your own simple 
 # plots of the variables.
+# ---------------------------------------------------------------------------
 
-# Your answer here:
+# Your code here
 
 
-# For this script, we will only need the tidyverse package, so go
-# ahead and edit the call to library(). 
 
-library()
+###################################################
+# (5) A small, complete analysis: the diamonds data
+###################################################
 
-###  Examining the data
+# For the rest of Part 1 we work with one dataset from start to finish, the
+# way a real project goes. "diamonds" comes with ggplot2 (so the tidyverse
+# gave it to us): ~54,000 diamonds, with price, size (carat) and quality
+# grades (cut, colour, clarity).
 
-# In our analysis, we are going to be working with the *diamonds* dataset, 
-# which is a built-in dataset provided with the ggplot2 package. If you
-# managed to successfully load the tidyverse package, diamonds should now
-# be available to you.
+### 5a. Examine ------------------------------------------------------------
 
 head(diamonds)
+glimpse(diamonds)
 summary(diamonds)
 
-# Let's create a histogram of values for 'price' with base R
-hist(diamonds$price, col = "steelblue",
-     main = "Histogram of Price Values",
-     xlab = "Price")
+# A first look at the outcome we care about, price. Base R:
+hist(diamonds$price, 
+     main = "Histogram of diamond prices", 
+     xlab = "Price (USD)")
 
-# And now with ggplot2
-ggplot(data = diamonds, aes(x = price)) +
-  geom_histogram(fill = "steelblue", color = "black") +
-  ggtitle("Histogram of Price Values")
+mean(diamonds$price)
+median(diamonds$price)
 
+# The same histogram in ggplot2:
+ggplot(diamonds, aes(x = price)) +
+  geom_histogram() +
+  labs(title = "Histogram of diamond prices", x = "Price (USD)", y = "Count")
 
-# Complete the code below to create a histogram of "price", 
-# group by "cut".
-ggplot(diamonds, aes(x = , fill = )) + 
-  geom_histogram(aes(color = cut), alpha = 0.5)
+# ---------------------------------------------------------------------------
+# EXERCISE 2: complete the code below to draw the price histogram split by
+# "cut" (fill AND colour the bars by cut).
+# ---------------------------------------------------------------------------
 
-### Wrangling the data
-
-# Most data science projects begin by organising our data.
-# Below, we are taking three subsets of the diamonds data. 
-# Can you work out what the code is doing?
-
-an_object <- diamonds[diamonds$cut == "Ideal",]
-anotherObject <- diamonds[diamonds$cut == "Premium", ]
-Object3 <- diamonds[diamonds$cut == "Very Good", ]  
+ggplot(diamonds, aes(x = , fill = )) +
+  geom_histogram(aes(colour = ), alpha = 0.5)
 
 
-# Each new subset becomes an object with a name. The names provided are not 
-# very good. Choose your own name in keeping with good data science principles, 
-# and edit the code accordingly.
+### 5b. Wrangle ----------------------------------------------------------
 
-# Renaming:
+# We want to compare three cuts. First, in base R, by subsetting rows with
+# square brackets [rows, columns]:
 
-# Your code here
+an_object      <- diamonds[diamonds$cut == "Ideal", ]
+anotherObject  <- diamonds[diamonds$cut == "Premium", ]
+Object3        <- diamonds[diamonds$cut == "Very Good", ]
 
-### Analysing our data
+# The tidyverse way to do the same thing is filter(), which reads better:
+#   filter(diamonds, cut == "Ideal")
 
-# Next, we want to find out the average price for our diamonds according to the
-# three types of cut we used to subset the data. Edit and complete
-# the code below to find out.
-
-mean(ideal_cut$price)
-mean(premium_cut$price)
-mean(very_good_cut$price)
-
-
-# What would you need to add to the code above if you wanted to create 3 new
-# objects each containing the different means? What names might you give these 
-# objects? Go ahead and try it out. 
+# ---------------------------------------------------------------------------
+# EXERCISE 3: the object names above are terrible. Re-create the three
+# subsets with clear names (e.g. ideal_cut, premium_cut, very_good_cut).
+# ---------------------------------------------------------------------------
 
 # Your code here
 
 
-### Visualising our data
+### 5c. Summarise ------------------------------------------------------------
 
-# As we might expect, there seems to be quite a difference between the average
-# price of the 3 cuts of diamonds. But is everything as you might expect?
+# Now the average price per cut. You *could* write mean() three times on
+# three objects - but that is copy-paste and that is not efficient.
+# group_by() + summarise() does all three groups in one statement:
 
-# Run the code below. What is strange about this boxplot?
-
-diamonds %>% 
+diamonds %>%
   filter(cut %in% c("Ideal", "Premium", "Very Good")) %>%
   group_by(cut) %>%
-  ggplot(aes(cut, price)) +
-  geom_boxplot()
+  summarise(
+    n = n(),
+    mean_price = mean(price),
+    mean_carat = mean(carat)
+  )
 
-# This could be an important finding. Edit the code above to assign the plot
-# to an object, and give it an appropriate name. 
+# %>% is the "pipe operator": it takes what is on its left and feeds it as the first
+# argument to the function on its right. Read it as "and then".
 
-boxplot_cut <- diamonds %>% 
+
+
+### 5d. Visualise ------------------------------------------------------------
+
+# Q: Ideal, Premium and Very Good, which cut
+# will have the highest median price? 
+
+boxplot_price <- diamonds %>%
   filter(cut %in% c("Ideal", "Premium", "Very Good")) %>%
-  group_by(cut) %>%
   ggplot(aes(cut, price)) +
-  geom_boxplot()
+  geom_boxplot() +
+  labs(title = "Diamond price by cut", x = NULL, y = "Price (USD)")
 
-### Investigating further
+boxplot_price
 
-# The "cut" variable is what is known in R as an *observed factor*.
-# A factor is a categorical variable (a variable with distinct categories).
-# An ordered factor is a factor where the different possible categories have 
-# an explicit order. 
+# Do you see a problem?
+
 
 class(diamonds$cut)
-
-# The levels() functions shows us the order for the 'cut' variable.
-# Again, looking at the boxplot, what is strange? 
-
 levels(diamonds$cut)
 
-# The carat of a diamond is the diamond's weight. Let's see if there is
-# any interaction with the 'cut' variable. Use the mean() function
-# on the carat variable for your three diamond subsets.
+# The clue is size. Look again at the summarise() table from 5c: which cut
+# has the largest mean carat? 
 
-mean(diamonds$carat)
+### 5e. Recycle code -------------------------------------------------------
 
-# mean carat, Ideal diamonds object
-mean(ideal_cut$carat)
-
-# mean carat, Premium diamonds object
-mean(premium_cut$carat)
-
-# mean carat, Very Good diamonds object
-mean(very_good_cut$carat)
-
-### Recycling code
-
-# Recycling code is an important skill. You may not quite understand yet 
-# everything that's going on in the code below (which we used to generate the
-# previous boxplot), but you should be able to work out how to edit it to 
-# produce a new boxplot which substitutes the price variable for carat. Give
-# it a go, and don't forget to also make an appropriately named object.
-# What do you notice about the plot?
-
-boxplot_carat <- diamonds %>% 
-  filter(cut %in% c("Ideal", "Premium", "Very Good")) %>%
-  group_by(cut) %>%
-  ggplot(aes(cut, carat)) +
-  geom_boxplot()
-
-boxplot_carat
-
-# %>% is the forward pipe operator
-# it takes the output of the expression on its left and passes it
-# as the first argument to the function on its right. 
+# ---------------------------------------------------------------------------
+# EXERCISE 5: take the boxplot code from 5d and adapt it to show "carat"
+# instead of "price". Save it to a sensibly named object. Does it support
+# the size explanation above?
+# ---------------------------------------------------------------------------
 
 # Your code here
 
-
-# Our final plot gives us a good idea of the interaction:
-# Can you describe what is happening here?
-
-diamonds %>%
-  filter(cut %in% c("Ideal", "Premium", "Very Good")) %>%
-  group_by(cut) %>%
-  ggplot(aes(carat, price, color = cut)) +
-  geom_point(alpha = 0.2) +
-  geom_smooth()
-
-### Saving our work
-
-# We decide that the scatter plot is a bit busy, and the line plot
-# with error bars does a good job of showing the interaction effect on its own. 
-# We added a clean theme and a title to the plot, and decide to save a pdf
-# of the plot as a record of our analysis. 
+# Putting price and carat together shows the real relationship - price rises
+# with carat, and the lines for the three cuts sit slightly apart:
 
 diamonds %>%
   filter(cut %in% c("Ideal", "Premium", "Very Good")) %>%
-  group_by(cut) %>%
-  ggplot(aes(carat, price, color = cut)) + 
-  geom_smooth() + 
+  ggplot(aes(carat, price, colour = cut)) +
+  geom_point(alpha = 0.15) +
+  geom_smooth() +
+  labs(title = "Price rises with carat; cut shifts the line",
+       x = "Carat", y = "Price (USD)", colour = "Cut")
+
+
+### 5f. Save our work ----------------------------------------------------
+
+# A clean version of the plot we want to keep as a record:
+price_carat_plot <- diamonds %>%
+  filter(cut %in% c("Ideal", "Premium", "Very Good")) %>%
+  ggplot(aes(carat, price, colour = cut)) +
+  geom_smooth() +
   theme_classic() +
-  labs(title = "Pick a good title for this plot")
+  labs(title = "Diamond price by carat and cut",
+       x = "Carat", y = "Price (USD)", colour = "Cut")
 
-# Choose a name for this file below, and then call the function to save it. 
+# ggsave() writes the last plot (or a named one) to a file.
+ggsave("diamonds_price_carat.pdf", plot = price_carat_plot)
 
-ggsave("filename.pdf", plot = last_plot())
+# write_csv() saves a data frame as a plain-text CSV.
+write_csv(diamonds, "diamonds_copy.csv")
 
-# We also decide it would be a good idea to have a record of the data
-# in the same location, so we use the write_csv() function to store a 
-# comma-separated values copy of the dataset.
-
-write_csv(diamonds, "filename.csv")
-
-# We also decide to rename our script file and save it in 
-# the same place. Now try closing R. Can you find the 
-# files in the working directory?
+# Check your working directory - both files should be there.
 
 
+#############################################
+# (6) Bridge to Part 2: read a file from disk
+#############################################
 
+# Everything so far used data that came bundled with a package. Usually your
+# data lives in a file. This is the payoff of setting a working directory:
+# a short relative path just works.
+
+# UCDP GED sample: one row per recorded event of organised violence
+# (a clash, an attack), 2014-2022, for four countries.
+# year, country, region, type_of_violence, date_start, best (deaths)
+
+ged <- read_csv("data/ucdp_ged_sample.csv")
+
+glimpse(ged)
+summary(ged)
+
+# A quick look - events per year:
+ged %>%
+  count(year) %>%
+  ggplot(aes(year, n)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Recorded events per year", x = NULL, y = "Events")
+
+# In Part 2 we come back to reading data - including messier formats like
+# JSON - and to writing functions that clean it up.
+
+
+###########################
+# You can now:
+###########################
+# - set / recognise a working directory and why Projects help
+# - install and load packages, and find help
+# - examine a new dataset (summary / str / glimpse / head)
+# - subset and group data, and summarise by group
+# - build and save a ggplot, and read a CSV from a relative path
