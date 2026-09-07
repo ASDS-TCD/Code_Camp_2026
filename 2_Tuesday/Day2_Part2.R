@@ -9,10 +9,6 @@
 #  Functions 
 ###########################
 
-# Read data
-library(readr)
-ucdp_ged_sample <- read_csv("data/ucdp_ged_sample.csv")
-
 # Let's write a function that takes a data frame, lowercases all of its column
 # names, and replaces spaces with underscores. A genuinely useful thing when 
 # you've just imported a survey with columns like "Birth Year" and "Q1 Response".

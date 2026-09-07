@@ -282,8 +282,6 @@ mean(very_good_cut$carat)
 # it a go, and don't forget to also make an appropriately named object.
 # What do you notice about the plot?
 
-
-# Your code here
 boxplot_carat <- diamonds %>% 
   filter(cut %in% c("Ideal", "Premium", "Very Good")) %>%
   group_by(cut) %>%
@@ -296,11 +294,8 @@ boxplot_carat
 # it takes the output of the expression on its left and passes it
 # as the first argument to the function on its right. 
 
-diamonds %>% 
-  filter(cut %in% c("Ideal", "Premium", "Very Good")) %>%
-  group_by(cut) %>%
-  ggplot(aes(cut, price)) +
-  geom_boxplot()
+# Your code here
+
 
 # Our final plot gives us a good idea of the interaction:
 # Can you describe what is happening here?
